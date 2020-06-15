@@ -340,8 +340,12 @@ class EncDecEvaluator(Evaluator):
 
         self.encoder.eval()
         self.decoder.eval()
-        encoder = self.encoder.module if params.multi_gpu else self.encoder
-        decoder = self.decoder.module if params.multi_gpu else self.decoder
+        if torch.cuda.is_available():
+            encoder = self.encoder.module if params.multi_gpu else self.encoder
+            decoder = self.decoder.module if params.multi_gpu else self.decoder
+        else:
+            encoder, decoder = self.encoder, self.decoder
+
 
         rng = np.random.RandomState(0)
 
@@ -357,8 +361,8 @@ class EncDecEvaluator(Evaluator):
             langs1 = x1.clone().fill_(lang_id)
             langs2 = x2.clone().fill_(lang_id)
 
-            # cuda
-            x1, len1, langs1, x2, len2, langs2, y, positions = to_cuda(x1, len1, langs1, x2, len2, langs2, y, positions)
+            if torch.cuda.is_available():
+                x1, len1, langs1, x2, len2, langs2, y, positions = to_cuda(x1, len1, langs1, x2, len2, langs2, y, positions)
 
             # encode source sentence
             enc1 = encoder('fwd', x=x1, lengths=len1, langs=langs1, causal=False)
