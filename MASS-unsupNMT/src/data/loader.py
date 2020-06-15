@@ -149,7 +149,7 @@ def load_mono_data(params, data):
                     dataset.remove_short_sentences(params.min_len)
 
                 # if there are several processes on the same machine, we can split the dataset
-                if splt == 'train' and params.n_gpu_per_node > 1 and params.split_data:
+                if torch.cuda.is_available() and splt == 'train' and params.n_gpu_per_node > 1 and params.split_data:
                     n_sent = len(dataset) // params.n_gpu_per_node
                     a = n_sent * params.local_rank
                     b = n_sent * params.local_rank + n_sent

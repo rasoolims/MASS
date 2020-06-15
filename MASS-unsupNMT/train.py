@@ -223,7 +223,8 @@ def get_parser():
 def main(params):
 
     # initialize the multi-GPU / multi-node training
-    init_distributed_mode(params)
+    if torch.cuda.is_available():
+        init_distributed_mode(params)
 
     # initialize the experiment
     logger = initialize_exp(params)
@@ -250,7 +251,7 @@ def main(params):
             decoder = network_to_half(decoder)
 
     # distributed
-    if params.multi_gpu:
+    if torch.cuda.is_available() and params.multi_gpu:
         logger.info("Using nn.parallel.DistributedDataParallel ...")
         if params.encoder_only:
             model = apex.parallel.DistributedDataParallel(model, delay_allreduce=True)

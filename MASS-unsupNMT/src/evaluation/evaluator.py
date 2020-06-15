@@ -34,7 +34,7 @@ class Evaluator(object):
         self.params = params
 
         # create directory to store hypotheses, and reference files for BLEU evaluation
-        if self.params.is_master:
+        if torch.cuda.is_available() and self.params.is_master:
             params.hyp_path = os.path.join(params.dump_path, 'hypotheses')
             subprocess.Popen('mkdir -p %s' % params.hyp_path, shell=True).wait()
             self.create_reference_files()

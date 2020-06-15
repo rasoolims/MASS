@@ -5,6 +5,8 @@
 # NOTICE FILE in the root directory of this source tree.
 #
 
+alias python=python3
+
 set -e
 
 
@@ -224,11 +226,13 @@ done
 # concatenate monolingual data files
 if ! [[ -f "$SRC_RAW" ]]; then
   echo "Concatenating $SRC monolingual data..."
-  cat $(ls $SRC/news*$SRC* | grep -v gz) | head -n $N_MONO > $SRC_RAW
+  gunzip $SRC/news*$SRC*
+  cat $SRC/news*$SRC* | head -n $N_MONO > $SRC_RAW
 fi
 if ! [[ -f "$TGT_RAW" ]]; then
   echo "Concatenating $TGT monolingual data..."
-  cat $(ls $TGT/news*$TGT* | grep -v gz) | head -n $N_MONO > $TGT_RAW
+   gunzip $TGT/news*$TGT*
+ cat $TGT/news*$TGT* | head -n $N_MONO > $TGT_RAW
 fi
 echo "$SRC monolingual data concatenated in: $SRC_RAW"
 echo "$TGT monolingual data concatenated in: $TGT_RAW"

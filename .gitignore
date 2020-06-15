@@ -8,7 +8,9 @@
 *.user
 *.userosscache
 *.sln.docstates
-
+MASS-unsupNMT/tools
+MASS-unsupNMT/dumped
+MASS-unsupNMT/data
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

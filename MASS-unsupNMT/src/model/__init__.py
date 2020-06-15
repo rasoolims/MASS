@@ -145,4 +145,7 @@ def build_model(params, dico):
         logger.info("Number of parameters (encoder): %i" % sum([p.numel() for p in encoder.parameters() if p.requires_grad]))
         logger.info("Number of parameters (decoder): %i" % sum([p.numel() for p in decoder.parameters() if p.requires_grad]))
 
-        return encoder.cuda(), decoder.cuda()
+        if torch.cuda.is_available():
+            return encoder.cuda(), decoder.cuda()
+        else:
+            return encoder, decoder
