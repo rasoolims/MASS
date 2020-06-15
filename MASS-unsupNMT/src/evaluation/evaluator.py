@@ -34,7 +34,7 @@ class Evaluator(object):
         self.params = params
 
         # create directory to store hypotheses, and reference files for BLEU evaluation
-        if torch.cuda.is_available() and self.params.is_master:
+        if not torch.cuda.is_available() or self.params.is_master:
             params.hyp_path = os.path.join(params.dump_path, 'hypotheses')
             subprocess.Popen('mkdir -p %s' % params.hyp_path, shell=True).wait()
             self.create_reference_files()
@@ -188,7 +188,7 @@ class Evaluator(object):
                             mass_steps.append((lang1, lang2))
                 # machine translation task (evaluate perplexity and accuracy)
                 for lang1, lang2 in set(params.mt_steps + [(l2, l3) for _, l2, l3 in params.bt_steps] + mass_steps):
-                    eval_bleu = params.eval_bleu and params.is_master
+                    eval_bleu = params.eval_bleu and (not torch.cuda.is_available() or params.is_master)
                     self.evaluate_mt(scores, data_set, lang1, lang2, eval_bleu)
 
                 # report average metrics per language
@@ -460,8 +460,9 @@ class EncDecEvaluator(Evaluator):
 
         self.encoder.eval()
         self.decoder.eval()
-        encoder = self.encoder.module if params.multi_gpu else self.encoder
-        decoder = self.decoder.module if params.multi_gpu else self.decoder
+
+        encoder = self.encoder.module if torch.cuda.is_available() and params.multi_gpu else self.encoder
+        decoder = self.decoder.module if torch.cuda.is_available() and params.multi_gpu else self.decoder
 
         params = params
         lang1_id = params.lang2id[lang1]
@@ -488,8 +489,8 @@ class EncDecEvaluator(Evaluator):
             y = x2[1:].masked_select(pred_mask[:-1])
             assert len(y) == (len2 - 1).sum().item()
 
-            # cuda
-            x1, len1, langs1, x2, len2, langs2, y = to_cuda(x1, len1, langs1, x2, len2, langs2, y)
+            if torch.cuda.is_available():
+                x1, len1, langs1, x2, len2, langs2, y = to_cuda(x1, len1, langs1, x2, len2, langs2, y)
 
             # encode source sentence
             enc1 = encoder('fwd', x=x1, lengths=len1, langs=langs1, causal=False)

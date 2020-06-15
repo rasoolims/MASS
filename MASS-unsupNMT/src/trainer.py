@@ -428,7 +428,7 @@ class Trainer(object):
         """
         Checkpoint the experiment.
         """
-        if not self.params.is_master:
+        if torch.cuda.is_available() and not self.params.is_master:
             return
 
         data = {
@@ -477,7 +477,7 @@ class Trainer(object):
         """
         Save the models periodically.
         """
-        if not self.params.is_master:
+        if torch.cuda.is_available() and not self.params.is_master:
             return
         if self.params.save_periodic > 0 and self.epoch % self.params.save_periodic == 0:
             self.save_model('periodic-%i' % self.epoch)
@@ -486,7 +486,7 @@ class Trainer(object):
         """
         Save best models according to given validation metrics.
         """
-        if not self.params.is_master:
+        if torch.cuda.is_available() and not self.params.is_master:
             return
         for metric, biggest in self.metrics:
             if metric not in scores:

@@ -329,7 +329,7 @@ def main(params):
         # print / JSON log
         for k, v in scores.items():
             logger.info("%s -> %.6f" % (k, v))
-        if params.is_master:
+        if not torch.cuda.is_available() or params.is_master:
             logger.info("__log__:%s" % json.dumps(scores))
 
         # end of epoch
