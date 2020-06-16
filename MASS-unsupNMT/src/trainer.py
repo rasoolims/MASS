@@ -903,8 +903,12 @@ class EncDecTrainer(Trainer):
             return
         assert lang1 == lang3 and lang1 != lang2 and lang2 is not None
         params = self.params
-        _encoder = self.encoder.module if params.multi_gpu else self.encoder
-        _decoder = self.decoder.module if params.multi_gpu else self.decoder
+        if torch.cuda.is_available():
+            _encoder = self.encoder.module
+            _decoder = self.decoder.module
+        else:
+            _encoder = self.encoder
+            _decoder = self.decoder
 
         lang1_id = params.lang2id[lang1]
         lang2_id = params.lang2id[lang2]
@@ -913,8 +917,8 @@ class EncDecTrainer(Trainer):
         x1, len1 = self.get_batch('bt', lang1)
         langs1 = x1.clone().fill_(lang1_id)
 
-        # cuda
-        x1, len1, langs1 = to_cuda(x1, len1, langs1)
+        if torch.cuda.is_available():
+            x1, len1, langs1 = to_cuda(x1, len1, langs1)
 
         # generate a translation
         with torch.no_grad():
